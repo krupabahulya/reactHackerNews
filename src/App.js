@@ -1,58 +1,45 @@
 import { useState, useEffect } from "react";
-import React from "react";
-import "./index.css";
-import Form from "./components/Form";
 import axios from "axios";
-
-
+import { css } from "@emotion/react";
+import ClipLoader from "react-spinners/ClipLoader";
+import Form from "./components/Form";
+import "./index.css";
 
 const App = () => {
   const [error, setError] = useState(null);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [news, setNews] = useState([]);
 
-  //Steffani
 
-  const [loading , setLoading] = useState(false)
-  useEffect(() =>{
-    setLoading(true)
-    setTimeout(() =>{
-      setLoading(false)
+  const override = css`
+    display: block;
+    margin: 0 auto;
+    border-color: red;
+  `;
 
-    },5000)
-  },[])
-  
-  
-//Steffani
-
-  const basicAPI = `https://hn.algolia.com/api/v1/search?query=react`;
   useEffect(() => {
-    axios.get(basicAPI).then(
-      (res) => {
-        setIsLoaded(true);
+    setLoading(true);
+    axios
+      .get(`https://hn.algolia.com/api/v1/search?query=react&tags=story`)
+      .then((res) => {
+        setLoading(false);
         setNews(res.data.hits);
-      }).catch((err) => {
-        setError(error);
-        console.error(error);
-        setIsLoaded(false);
-      }
-    );
+      })
+      .catch((err) => {
+        setError(err);
+        console.error(err);
+        setLoading(false);
+      });
   }, []);
 
-  console.log("news", news);
-  if (error) {
-    return <>Error: {error.message}</>;
-  } else if (!isLoaded) {
-    return <>Loading...</>;
-  } else {
-    return (
-      <div className="App">
-      {
-        loading?    //steffani
-         <ClipLoader color={color} loading={loading} css={override} size={150}/>         //steffani
-      }:           //steffani : I need to fix this error
-         <h1 className="heading">Hacker News</h1>
-        <Form />
+  if (error) return <>Error: {error.message}</>;
+  return (
+    <div className="App">
+      <h1 className="heading">Hacker News</h1>
+      <Form />
+      {loading ? ( //steffani
+        <ClipLoader color="#ffffff" loading={loading} css={override} size={150} /> //steffani : I need to fix this error and migrate the code to the Gif.js with import and export functions
+      ) : (
         <ul>
           {news.map((story) => (
             <li key={story.objectID}>
@@ -64,9 +51,9 @@ const App = () => {
             </li>
           ))}
         </ul>
-      </div>
-    );
-  }
+      )}
+    </div>
+  );
 };
 
 export default App;
